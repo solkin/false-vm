@@ -38,12 +38,13 @@ const (
 	InstrFetch = 23
 
 	InstrCall   = 24
-	InstrReturn = 25
+	InstrCallIf = 25
+	InstrReturn = 26
 
-	InstrGoto   = 26
-	InstrGotoIf = 27
+	InstrGoto   = 27
+	InstrGotoIf = 28
 
-	InstrEnd = 28
+	InstrEnd = 29
 )
 
 var InstrMap = map[rune]int{
@@ -147,25 +148,7 @@ func (p *Parser) Parse(str string) ([]int, error) {
 			out.Add(InstrCall)
 		} else if input.IsIf() {
 			input.SkipIf()
-			out.Add(InstrGoto)
-			out.Add(out.Size + 2)
-			addr := out.Size
-			out.Add(0) // Conditional lambda address reserve
-			out.Add(InstrStore)
-			out.Add(addr)
-			// Add goto condition body address to stack
-			out.Add(InstrPush)
-			out.Add(out.Size + 4)
-
-			out.Add(InstrGotoIf)
-
-			// Skip condition goto body
-			out.Add(InstrGoto)
-			out.Add(out.Size + 4)
-			// Call conditional lambda
-			out.Add(InstrFetch)
-			out.Add(addr)
-			out.Add(InstrCall)
+			out.Add(InstrCallIf)
 		} else if input.IsWhile() {
 			input.SkipWhile()
 			out.Add(InstrGoto)

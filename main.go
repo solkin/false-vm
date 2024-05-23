@@ -36,7 +36,7 @@ func main() {
 	before := time.Now().UnixMilli()
 	err = vm.Run()
 	after := time.Now().UnixMilli()
-	log.Fatalln("cpu time: ", after-before, "milliseconds")
+	log.Println("cpu time: ", after-before, "milliseconds")
 	vm.Dump()
 	if err != nil {
 		log.Fatalln("vm fault:", err.Error())

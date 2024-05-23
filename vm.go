@@ -355,26 +355,27 @@ func (vm *VM) Run() error {
 			}
 			break
 		case InstrCall:
-			err = vm.CallStack.Push(vm.ip)
+			addr, err := vm.OpStack.Pop()
 			if err != nil {
 				return err
 			}
-			addr, err := vm.OpStack.Pop()
+			err = vm.CallStack.Push(vm.ip)
 			if err != nil {
 				return err
 			}
 			vm.ip = addr
 			break
-		case InstrGotoIf:
-			addr := 0
-			if addr, err = vm.OpStack.Pop(); err != nil {
+		case InstrCallIf:
+			addr, err := vm.OpStack.Pop()
+			if err != nil {
 				return err
 			}
-			cond := 0
-			if cond, err = vm.OpStack.Pop(); err != nil {
+			cond, err := vm.OpStack.Pop()
+			if err != nil {
 				return err
 			}
 			if cond != 0 {
+				err = vm.CallStack.Push(vm.ip)
 				if err != nil {
 					return err
 				}
@@ -394,6 +395,19 @@ func (vm *VM) Run() error {
 				return err
 			}
 			vm.ip = addr
+			break
+		case InstrGotoIf:
+			addr := 0
+			if addr, err = vm.OpStack.Pop(); err != nil {
+				return err
+			}
+			cond := 0
+			if cond, err = vm.OpStack.Pop(); err != nil {
+				return err
+			}
+			if cond != 0 {
+				vm.ip = addr
+			}
 			break
 		case InstrEnd:
 			_, _ = w.WriteString("\n\nvm gracefully stopped\n")
