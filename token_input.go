@@ -61,10 +61,10 @@ func (ti *TokenInput) IsCharCode() bool {
 	return ti.Input.Peek() == '\''
 }
 
-func (ti *TokenInput) ReadCharCode() (int, error) {
+func (ti *TokenInput) ReadCharCode() (rune, error) {
 	if ti.IsCharCode() {
 		ti.Input.Next()
-		return int(ti.Input.Next()), nil
+		return ti.Input.Next(), nil
 	}
 	err := errors.New("not a char")
 	ti.Input.Croak(err.Error())

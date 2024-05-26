@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -23,13 +24,18 @@ func main() {
 		log.Fatalln("parsing failed")
 	}
 	h := ""
-	for i := 0; i < len(img); i++ {
-		h += fmt.Sprintf("%d ", img[i])
+	img32 := make([]int, len(img)/4)
+	c := 0
+	for i := 0; i < len(img); i += 4 {
+		i32 := binary.LittleEndian.Uint32(img[i : i+4])
+		img32[c] = int(i32)
+		c++
+		h += fmt.Sprintf("%d ", i32)
 	}
 	log.Printf("   image loaded: %s\n", h)
 
 	vm := NewVM(1024, 60, 60)
-	err = vm.Load(img)
+	err = vm.Load(img32)
 	if err != nil {
 		log.Fatalln("image loading failed")
 	}

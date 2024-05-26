@@ -13,16 +13,16 @@ import (
 type VM struct {
 	Memory    []int
 	ip        int
-	OpStack   *Stack
-	CallStack *Stack
+	OpStack   *IntStack
+	CallStack *IntStack
 }
 
 func NewVM(size int, opStackSize int, callStackSize int) *VM {
 	memory := make([]int, size)
 	return &VM{
 		Memory:    memory,
-		OpStack:   NewStack(memory, len(memory)-callStackSize-opStackSize, opStackSize),
-		CallStack: NewStack(memory, len(memory)-callStackSize, callStackSize),
+		OpStack:   NewIntStack(memory, len(memory)-callStackSize-opStackSize, opStackSize),
+		CallStack: NewIntStack(memory, len(memory)-callStackSize, callStackSize),
 	}
 }
 
@@ -30,13 +30,7 @@ func (vm *VM) Load(img []int) error {
 	if len(img) > len(vm.Memory) {
 		return errors.New("image size is larger than allocated memory")
 	}
-	for c := 0; c < len(vm.Memory); c++ {
-		if c < len(img) {
-			vm.Memory[c] = img[c]
-		} else {
-			vm.Memory[c] = 0
-		}
-	}
+	copy(vm.Memory, img)
 	vm.ip = 0
 	vm.OpStack.Reset()
 	vm.CallStack.Reset()

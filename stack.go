@@ -1,52 +1,49 @@
 package main
 
-import "errors"
-
-type Stack struct {
-	Array  []int
-	Offset int
-	Size   int
-	p      int
-}
-
-func NewStack(arr []int, offset int, size int) *Stack {
-	return &Stack{
-		Array:  arr,
-		Offset: offset,
-		Size:   size,
-		p:      offset + size,
+type (
+	Stack struct {
+		top    *node
+		length int
 	}
-}
-
-func (s *Stack) Reset() {
-	s.p = s.Offset + s.Size
-}
-
-func (s *Stack) Pick(v int) (int, error) {
-	if s.p+v >= s.Offset+s.Size {
-		return 0, errors.New("stack out of range")
+	node struct {
+		value interface{}
+		prev  *node
 	}
-	return s.Array[s.p+v], nil
+)
+
+// NewStack Create a new stack
+func NewStack() *Stack {
+	return &Stack{nil, 0}
 }
 
-func (s *Stack) Push(v int) error {
-	if s.p-1 < s.Offset {
-		return errors.New("stack overflow")
+// Len Return the number of items in the stack
+func (s *Stack) Len() int {
+	return s.length
+}
+
+// Peek View the top item on the stack
+func (s *Stack) Peek() interface{} {
+	if s.length == 0 {
+		return nil
 	}
-	s.p--
-	s.Array[s.p] = v
-	return nil
+	return s.top.value
 }
 
-func (s *Stack) Peek() int {
-	return s.Array[s.p]
-}
-
-func (s *Stack) Pop() (int, error) {
-	if s.p >= s.Offset+s.Size {
-		return 0, errors.New("stack underflow")
+// Pop the top item of the stack and return it
+func (s *Stack) Pop() interface{} {
+	if s.length == 0 {
+		return nil
 	}
-	i := s.Array[s.p]
-	s.p++
-	return i, nil
+
+	n := s.top
+	s.top = n.prev
+	s.length--
+	return n.value
+}
+
+// Push a value onto the top of the stack
+func (s *Stack) Push(value interface{}) {
+	n := &node{value, s.top}
+	s.top = n
+	s.length++
 }
