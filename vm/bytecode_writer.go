@@ -36,15 +36,16 @@ const (
 
 	InstrStore int = 22
 	InstrFetch int = 23
+	InstrCopy  int = 24
 
-	InstrCall   int = 24
-	InstrCallIf int = 25
-	InstrReturn int = 26
+	InstrCall   int = 25
+	InstrCallIf int = 26
+	InstrReturn int = 27
 
-	InstrGoto   int = 27
-	InstrGotoIf int = 28
+	InstrGoto   int = 28
+	InstrGotoIf int = 29
 
-	InstrEnd int = 29
+	InstrEnd int = 30
 )
 
 type BufferWrapper struct {
@@ -119,6 +120,12 @@ func (w *BytecodeWriter) WriteStore(addr int) {
 func (w *BytecodeWriter) WriteFetch(addr int) {
 	w.WriteCommand(InstrFetch)
 	w.WriteInt(addr)
+}
+
+func (w *BytecodeWriter) WriteCopy(addr1 int, addr2 int) {
+	w.WriteCommand(InstrCopy)
+	w.WriteInt(addr1)
+	w.WriteInt(addr2)
 }
 
 func (w *BytecodeWriter) WriteCall() {

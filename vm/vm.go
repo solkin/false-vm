@@ -12,6 +12,8 @@ import (
 
 type VM struct {
 	Memory    []int
+	pmOffset  int
+	pmSize    int
 	ip        int
 	OpStack   *IntStack
 	CallStack *IntStack
@@ -21,6 +23,8 @@ func NewVM(size int, opStackSize int, callStackSize int) *VM {
 	memory := make([]int, size)
 	return &VM{
 		Memory:    memory,
+		pmOffset:  0,
+		pmSize:    size - callStackSize - opStackSize,
 		OpStack:   NewIntStack(memory, len(memory)-callStackSize-opStackSize, opStackSize),
 		CallStack: NewIntStack(memory, len(memory)-callStackSize, callStackSize),
 	}
@@ -275,27 +279,45 @@ func (vm *VM) Run() error {
 			_ = w.Flush()
 			break
 		case InstrStore:
-			addr, err := vm.next()
-			if err != nil {
-				return err
+			var addr, val int
+			if addr, err = vm.next(); err == nil {
+				if addr >= vm.pmOffset && addr < vm.pmSize {
+					if val, err = vm.OpStack.Pop(); err == nil {
+						vm.Memory[addr] = val
+						break
+					}
+				} else {
+					err = errors.New("out of memory")
+				}
 			}
-			val, err := vm.OpStack.Pop()
-			if err != nil {
-				return err
-			}
-			vm.Memory[addr] = val
-			break
+			return err
 		case InstrFetch:
-			addr, err := vm.next()
-			if err != nil {
-				return err
+			var addr int
+			if addr, err = vm.next(); err == nil {
+				if addr >= vm.pmOffset && addr < vm.pmSize {
+					val := vm.Memory[addr]
+					if err = vm.OpStack.Push(val); err == nil {
+						break
+					}
+				} else {
+					err = errors.New("out of memory")
+				}
 			}
-			val := vm.Memory[addr]
-			err = vm.OpStack.Push(val)
-			if err != nil {
-				return err
+			return err
+		case InstrCopy:
+			var addr1, addr2 int
+			if addr1, err = vm.next(); err == nil {
+				if addr2, err = vm.next(); err == nil {
+					if addr1 >= vm.pmOffset && addr1 < vm.pmSize &&
+						addr2 >= vm.pmOffset && addr2 < vm.pmSize {
+						vm.Memory[addr2] = vm.Memory[addr1]
+						break
+					} else {
+						err = errors.New("out of memory")
+					}
+				}
 			}
-			break
+			return err
 		case InstrCall:
 			addr, err := vm.OpStack.Pop()
 			if err != nil {
