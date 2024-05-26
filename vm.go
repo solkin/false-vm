@@ -138,157 +138,105 @@ func (vm *VM) Run() error {
 			}
 			break
 		case InstrPlus:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					err = vm.OpStack.Push(v1 + v2)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				if err = vm.OpStack.Push(v1 + v2); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrMinus:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					err = vm.OpStack.Push(v2 - v1)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				if err = vm.OpStack.Push(v2 - v1); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrMultiply:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					err = vm.OpStack.Push(v1 * v2)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				if err = vm.OpStack.Push(v1 * v2); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrDivide:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					err = vm.OpStack.Push(v2 / v1)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				if err = vm.OpStack.Push(v2 / v1); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrNegative:
-			if v, err := vm.OpStack.Pop(); err == nil {
-				err = vm.OpStack.Push(-v)
-				if err != nil {
-					return err
+			v, err := vm.OpStack.Pop()
+			if err == nil {
+				if err = vm.OpStack.Push(-v); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrAnd:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					res := 0
-					if v1 != 0 && v2 != 0 {
-						res = 1
-					}
-					err = vm.OpStack.Push(res)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				res := 0
+				if v1 != 0 && v2 != 0 {
+					res = 1
 				}
-			} else {
-				return err
+				if err = vm.OpStack.Push(res); err == nil {
+					break
+				}
 			}
-			break
+			return err
 		case InstrOr:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					res := 0
-					if v1 != 0 || v2 != 0 {
-						res = 1
-					}
-					err = vm.OpStack.Push(res)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				res := 0
+				if v1 != 0 || v2 != 0 {
+					res = 1
 				}
-			} else {
-				return err
+				if err = vm.OpStack.Push(res); err == nil {
+					break
+				}
 			}
-			break
+			return err
 		case InstrNot:
-			if v1, err := vm.OpStack.Pop(); err == nil {
+			v1, err := vm.OpStack.Pop()
+			if err == nil {
 				res := 0
 				if v1 == 0 {
 					res = 1
 				}
-				err = vm.OpStack.Push(res)
-				if err != nil {
-					return err
+				if err = vm.OpStack.Push(res); err == nil {
+					break
 				}
-			} else {
-				return err
 			}
-			break
+			return err
 		case InstrEquals:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					eq := 0
-					if v1 == v2 {
-						eq = 1
-					}
-					err = vm.OpStack.Push(eq)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				eq := 0
+				if v1 == v2 {
+					eq = 1
 				}
-			} else {
-				return err
+				if err = vm.OpStack.Push(eq); err == nil {
+					break
+				}
 			}
-			break
+			return err
 		case InstrMore:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					eq := 0
-					if v2 > v1 {
-						eq = 1
-					}
-					err = vm.OpStack.Push(eq)
-					if err != nil {
-						return err
-					}
-				} else {
-					return err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				eq := 0
+				if v2 > v1 {
+					eq = 1
 				}
-			} else {
-				return err
+				if err = vm.OpStack.Push(eq); err == nil {
+					break
+				}
 			}
-			break
+			return err
 		case InstrWriteInt:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
@@ -409,6 +357,18 @@ func (vm *VM) Run() error {
 		default:
 			return errors.New("invalid instruction " + strconv.Itoa(i))
 		}
+	}
+}
+
+func (s *IntStack) PopPop() (int, int, error) {
+	if v1, err := s.Pop(); err == nil {
+		if v2, err := s.Pop(); err == nil {
+			return v1, v2, err
+		} else {
+			return 0, 0, err
+		}
+	} else {
+		return 0, 0, err
 	}
 }
 
