@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	false2 "sandbox-vm/false"
+	vm2 "sandbox-vm/vm"
 	"time"
 )
 
@@ -18,7 +20,7 @@ func main() {
 		log.Fatalln("unable to read file:", err.Error())
 	}
 
-	p := NewParser()
+	p := false2.NewParser()
 	img, err := p.Parse(string(data))
 	if err != nil {
 		log.Fatalln("parsing failed")
@@ -34,7 +36,7 @@ func main() {
 	}
 	log.Printf("   image loaded: %s\n", h)
 
-	vm := NewVM(1024, 60, 60)
+	vm := vm2.NewVM(1024, 60, 60)
 	err = vm.Load(img32)
 	if err != nil {
 		log.Fatalln("image loading failed")

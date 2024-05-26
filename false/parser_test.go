@@ -1,7 +1,8 @@
-package main
+package false
 
 import (
 	"reflect"
+	"sandbox-vm/vm"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func TestParser_Parse(t *testing.T) {
 			}{
 				str: "1 2 \\ + .",
 			},
-			want:    []int{1, 1, 1, 2, InstrSwap, InstrPlus, InstrWriteInt, InstrEnd},
+			want:    []int{1, 1, 1, 2, vm.InstrSwap, vm.InstrPlus, vm.InstrWriteInt, vm.InstrEnd},
 			wantErr: false,
 		},
 	}

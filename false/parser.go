@@ -1,32 +1,34 @@
-package main
+package false
 
 import (
 	"errors"
+	"sandbox-vm/input"
+	"sandbox-vm/vm"
 )
 
 type Parser struct {
 }
 
 var InstrMap = map[rune]int{
-	DUP:        InstrDup,
-	DROP:       InstrDrop,
-	SWAP:       InstrSwap,
-	ROT:        InstrRot,
-	PICK:       InstrPick,
-	PLUS:       InstrPlus,
-	MINUS:      InstrMinus,
-	MULTIPLY:   InstrMultiply,
-	DIVIDE:     InstrDivide,
-	NEGATIVE:   InstrNegative,
-	AND:        InstrAnd,
-	OR:         InstrOr,
-	NOT:        InstrNot,
-	GREATER:    InstrMore,
-	EQUALS:     InstrEquals,
-	READ_CHAR:  InstrReadChar,
-	WRITE_CHAR: InstrWriteChar,
-	WRITE_INT:  InstrWriteInt,
-	FLUSH:      InstrFlush,
+	DUP:        vm.InstrDup,
+	DROP:       vm.InstrDrop,
+	SWAP:       vm.InstrSwap,
+	ROT:        vm.InstrRot,
+	PICK:       vm.InstrPick,
+	PLUS:       vm.InstrPlus,
+	MINUS:      vm.InstrMinus,
+	MULTIPLY:   vm.InstrMultiply,
+	DIVIDE:     vm.InstrDivide,
+	NEGATIVE:   vm.InstrNegative,
+	AND:        vm.InstrAnd,
+	OR:         vm.InstrOr,
+	NOT:        vm.InstrNot,
+	GREATER:    vm.InstrMore,
+	EQUALS:     vm.InstrEquals,
+	READ_CHAR:  vm.InstrReadChar,
+	WRITE_CHAR: vm.InstrWriteChar,
+	WRITE_INT:  vm.InstrWriteInt,
+	FLUSH:      vm.InstrFlush,
 }
 
 func NewParser() *Parser {
@@ -34,26 +36,26 @@ func NewParser() *Parser {
 }
 
 func (p *Parser) Parse(str string) ([]byte, error) {
-	input := TokenInput{Input: StringInput{Str: str}}
+	ti := TokenInput{Input: &input.StringInput{Str: str}}
 
-	w := NewBytecodeWriter()
+	w := vm.NewBytecodeWriter()
 
 	vars := make(map[string]int)
-	for !input.Eof() {
-		if input.IsInt() {
-			if v, err := input.ReadInt(); err == nil {
+	for !ti.Eof() {
+		if ti.IsInt() {
+			if v, err := ti.ReadInt(); err == nil {
 				w.WritePush(v)
 			} else {
 				return nil, err
 			}
-		} else if input.IsCharCode() {
-			if v, err := input.ReadCharCode(); err == nil {
+		} else if ti.IsCharCode() {
+			if v, err := ti.ReadCharCode(); err == nil {
 				w.WritePush(int(v))
 			} else {
 				return nil, err
 			}
-		} else if input.IsVar() {
-			if v, m, err := input.ReadVar(); err == nil {
+		} else if ti.IsVar() {
+			if v, m, err := ti.ReadVar(); err == nil {
 				var addr int
 				ok := false
 				if addr, ok = vars[v]; !ok {
@@ -72,23 +74,23 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			} else {
 				return nil, err
 			}
-		} else if input.IsSubStart() {
-			input.SkipSubStart()
+		} else if ti.IsSubStart() {
+			ti.SkipSubStart()
 			w.SubCreate()
-		} else if input.IsSubEnd() {
-			input.SkipSubEnd()
+		} else if ti.IsSubEnd() {
+			ti.SkipSubEnd()
 			if err := w.SubReturn(); err != nil {
-				input.Input.Croak(err.Error())
+				ti.Input.Croak(err.Error())
 				return nil, err
 			}
-		} else if input.IsSubCall() {
-			input.SkipSubCall()
+		} else if ti.IsSubCall() {
+			ti.SkipSubCall()
 			w.WriteCall()
-		} else if input.IsIf() {
-			input.SkipIf()
+		} else if ti.IsIf() {
+			ti.SkipIf()
 			w.WriteCallIf()
-		} else if input.IsWhile() {
-			input.SkipWhile()
+		} else if ti.IsWhile() {
+			ti.SkipWhile()
 			// Reserved condition and body addresses
 			ca := w.WriteVar(0)
 			ba := w.WriteVar(0)
@@ -110,27 +112,27 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			w.WritePush(bca)
 			// Call condition
 			w.WriteGotoIf()
-		} else if input.IsCommand() {
-			if ic, err := input.ReadCommand(); err == nil {
+		} else if ti.IsCommand() {
+			if ic, err := ti.ReadCommand(); err == nil {
 				if cmd, ok := InstrMap[ic]; ok {
 					w.WriteCommand(cmd)
 				} else {
 					err := errors.New("invalid command")
-					input.Input.Croak(err.Error())
+					ti.Input.Croak(err.Error())
 					return nil, err
 				}
 			} else {
 				return nil, err
 			}
-		} else if input.IsString() {
-			if s, err := input.ReadString(); err == nil {
+		} else if ti.IsString() {
+			if s, err := ti.ReadString(); err == nil {
 				w.WriteString(s)
 			} else {
-				input.Input.Croak(err.Error())
+				ti.Input.Croak(err.Error())
 				return nil, err
 			}
-		} else if input.IsWhitespace() {
-			input.SkipWhitespace()
+		} else if ti.IsWhitespace() {
+			ti.SkipWhitespace()
 		}
 	}
 	w.WriteEnd()

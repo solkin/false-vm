@@ -1,13 +1,14 @@
-package main
+package false
 
 import (
 	"errors"
+	"sandbox-vm/input"
 	"strconv"
 	"unicode"
 )
 
 type TokenInput struct {
-	Input StringInput
+	Input input.RuneInput
 }
 
 const (

@@ -1,10 +1,13 @@
-package main
+package false
 
-import "testing"
+import (
+	"sandbox-vm/input"
+	"testing"
+)
 
 func TestTokenInput_IsInt(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -13,12 +16,12 @@ func TestTokenInput_IsInt(t *testing.T) {
 	}{
 		{
 			name:   "check 0 is int",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "0"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "0"}},
 			want:   true,
 		},
 		{
 			name:   "check a is not int",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:   false,
 		},
 	}
@@ -36,7 +39,7 @@ func TestTokenInput_IsInt(t *testing.T) {
 
 func TestTokenInput_ReadInt(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name    string
@@ -46,25 +49,25 @@ func TestTokenInput_ReadInt(t *testing.T) {
 	}{
 		{
 			name:    "check 1 is read as 1",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "1"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "1"}},
 			want:    1,
 			wantErr: false,
 		},
 		{
 			name:    "check 123 is read as 123",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "123"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "123"}},
 			want:    123,
 			wantErr: false,
 		},
 		{
 			name:    "check 12a is read as 12",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "12a"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "12a"}},
 			want:    12,
 			wantErr: false,
 		},
 		{
 			name:    "check a12 produces error",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "a12"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "a12"}},
 			want:    0,
 			wantErr: true,
 		},
@@ -88,7 +91,7 @@ func TestTokenInput_ReadInt(t *testing.T) {
 
 func TestTokenInput_IsCharCode(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -97,12 +100,12 @@ func TestTokenInput_IsCharCode(t *testing.T) {
 	}{
 		{
 			name:   "check 'a is char",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "'a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "'a"}},
 			want:   true,
 		},
 		{
 			name:   "check a is not char",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:   false,
 		},
 	}
@@ -120,7 +123,7 @@ func TestTokenInput_IsCharCode(t *testing.T) {
 
 func TestTokenInput_ReadCharCode(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name    string
@@ -130,19 +133,19 @@ func TestTokenInput_ReadCharCode(t *testing.T) {
 	}{
 		{
 			name:    "check 'a is read as char a",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "'a"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "'a"}},
 			want:    int('a'),
 			wantErr: false,
 		},
 		{
 			name:    "check 'aa is read as char a",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "'aa"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "'aa"}},
 			want:    int('a'),
 			wantErr: false,
 		},
 		{
 			name:    "check aa is not char",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "aa"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "aa"}},
 			want:    0,
 			wantErr: true,
 		},
@@ -166,7 +169,7 @@ func TestTokenInput_ReadCharCode(t *testing.T) {
 
 func TestTokenInput_IsCommand(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -175,77 +178,77 @@ func TestTokenInput_IsCommand(t *testing.T) {
 	}{
 		{
 			name:   "check $ is a stack operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "$"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "$"}},
 			want:   true,
 		},
 		{
 			name:   "check % is a stack operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "%"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "%"}},
 			want:   true,
 		},
 		{
 			name:   "check \\ is a stack operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "\\"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "\\"}},
 			want:   true,
 		},
 		{
 			name:   "check @ is a stack operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "@"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "@"}},
 			want:   true,
 		},
 		{
 			name:   "check ø is a stack operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "ø"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "ø"}},
 			want:   true,
 		},
 		{
 			name:   "check + is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "+"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "+"}},
 			want:   true,
 		},
 		{
 			name:   "check - is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "-"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "-"}},
 			want:   true,
 		},
 		{
 			name:   "check * is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "*"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "*"}},
 			want:   true,
 		},
 		{
 			name:   "check / is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "/"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "/"}},
 			want:   true,
 		},
 		{
 			name:   "check _ is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "_"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "_"}},
 			want:   true,
 		},
 		{
 			name:   "check & is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "&"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "&"}},
 			want:   true,
 		},
 		{
 			name:   "check | is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "|"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "|"}},
 			want:   true,
 		},
 		{
 			name:   "check ~ is an arithmetic operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "~"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "~"}},
 			want:   true,
 		},
 		{
 			name:   "check > is an comparison operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: ">"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: ">"}},
 			want:   true,
 		},
 		{
 			name:   "check = is an comparison operation",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "="}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "="}},
 			want:   true,
 		},
 	}
@@ -263,7 +266,7 @@ func TestTokenInput_IsCommand(t *testing.T) {
 
 func TestTokenInput_IsString(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -272,12 +275,12 @@ func TestTokenInput_IsString(t *testing.T) {
 	}{
 		{
 			name:   "check \"a\" is string",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "\"a\""}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "\"a\""}},
 			want:   true,
 		},
 		{
 			name:   "check a is not int",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:   false,
 		},
 	}
@@ -295,7 +298,7 @@ func TestTokenInput_IsString(t *testing.T) {
 
 func TestTokenInput_ReadString(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name    string
@@ -305,25 +308,25 @@ func TestTokenInput_ReadString(t *testing.T) {
 	}{
 		{
 			name:    "check \"1\" is read as string 1",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "\"1\""}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "\"1\""}},
 			want:    "1",
 			wantErr: false,
 		},
 		{
 			name:    "check \"123\" is read as string 123",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "\"123\""}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "\"123\""}},
 			want:    "123",
 			wantErr: false,
 		},
 		{
 			name:    "check \"12\". is read as string 12",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "\"12\"a"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "\"12\"a"}},
 			want:    "12",
 			wantErr: false,
 		},
 		{
 			name:    "check a12\" produces error",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "a12\""}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "a12\""}},
 			want:    "",
 			wantErr: true,
 		},
@@ -347,7 +350,7 @@ func TestTokenInput_ReadString(t *testing.T) {
 
 func TestTokenInput_IsVar(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -356,17 +359,17 @@ func TestTokenInput_IsVar(t *testing.T) {
 	}{
 		{
 			name:   "check 0 is not var",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "0"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "0"}},
 			want:   false,
 		},
 		{
 			name:   "check a is var",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:   true,
 		},
 		{
 			name:   "check aa is var",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "aa"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "aa"}},
 			want:   true,
 		},
 	}
@@ -384,7 +387,7 @@ func TestTokenInput_IsVar(t *testing.T) {
 
 func TestTokenInput_ReadVar(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name    string
@@ -395,35 +398,35 @@ func TestTokenInput_ReadVar(t *testing.T) {
 	}{
 		{
 			name:    "check 1 is not var",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "1"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "1"}},
 			want:    "",
 			want1:   0,
 			wantErr: true,
 		},
 		{
 			name:    "check 1a is not var",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "1a"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "1a"}},
 			want:    "",
 			want1:   0,
 			wantErr: true,
 		},
 		{
 			name:    "check a is invalid var mode",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:    "",
 			want1:   0,
 			wantErr: true,
 		},
 		{
 			name:    "check a: is store var a",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "a:"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "a:"}},
 			want:    "a",
 			want1:   STORE_VAR,
 			wantErr: false,
 		},
 		{
 			name:    "check a;12 is fetch var a",
-			fields:  struct{ Input StringInput }{Input: StringInput{Str: "a;12"}},
+			fields:  struct{ Input input.StringInput }{Input: input.StringInput{Str: "a;12"}},
 			want:    "a",
 			want1:   FETCH_VAR,
 			wantErr: false,
@@ -451,7 +454,7 @@ func TestTokenInput_ReadVar(t *testing.T) {
 
 func TestTokenInput_IsSubStart(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -460,17 +463,17 @@ func TestTokenInput_IsSubStart(t *testing.T) {
 	}{
 		{
 			name:   "check a[ is not sub",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a["}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a["}},
 			want:   false,
 		},
 		{
 			name:   "check [] is sub",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "[]"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "[]"}},
 			want:   true,
 		},
 		{
 			name:   "check [[]] is sub",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "[[]]"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "[[]]"}},
 			want:   true,
 		},
 	}
@@ -488,7 +491,7 @@ func TestTokenInput_IsSubStart(t *testing.T) {
 
 func TestTokenInput_IsSubEnd(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -497,17 +500,17 @@ func TestTokenInput_IsSubEnd(t *testing.T) {
 	}{
 		{
 			name:   "check a] is not sub end",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a]"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a]"}},
 			want:   false,
 		},
 		{
 			name:   "check ] is sub end",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "]"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "]"}},
 			want:   true,
 		},
 		{
 			name:   "check ]a is sub end",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "]a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "]a"}},
 			want:   true,
 		},
 	}
@@ -525,7 +528,7 @@ func TestTokenInput_IsSubEnd(t *testing.T) {
 
 func TestTokenInput_IsSubCall(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -534,17 +537,17 @@ func TestTokenInput_IsSubCall(t *testing.T) {
 	}{
 		{
 			name:   "check a! is not sub call",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a!"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a!"}},
 			want:   false,
 		},
 		{
 			name:   "check ! is sub call",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "!"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "!"}},
 			want:   true,
 		},
 		{
 			name:   "check !a is sub call",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "!a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "!a"}},
 			want:   true,
 		},
 	}
@@ -562,7 +565,7 @@ func TestTokenInput_IsSubCall(t *testing.T) {
 
 func TestTokenInput_NextSkipWhitespaces(t *testing.T) {
 	type fields struct {
-		Input StringInput
+		Input input.StringInput
 	}
 	tests := []struct {
 		name   string
@@ -571,17 +574,17 @@ func TestTokenInput_NextSkipWhitespaces(t *testing.T) {
 	}{
 		{
 			name:   "check a returns a",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "a"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "a"}},
 			want:   'a',
 		},
 		{
 			name:   "check ' aa' returns a",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: " aa"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: " aa"}},
 			want:   'a',
 		},
 		{
 			name:   "check 'aa' returns a",
-			fields: struct{ Input StringInput }{Input: StringInput{Str: "aa"}},
+			fields: struct{ Input input.StringInput }{Input: input.StringInput{Str: "aa"}},
 			want:   'a',
 		},
 	}
