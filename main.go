@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	false2 "sandbox-vm/false"
+	"path/filepath"
+	"sandbox-vm/bf"
+	"sandbox-vm/false"
 	vm2 "sandbox-vm/vm"
 	"time"
 )
@@ -20,11 +22,24 @@ func main() {
 		log.Fatalln("unable to read file:", err.Error())
 	}
 
-	p := false2.NewParser()
-	img, err := p.Parse(string(data))
-	if err != nil {
-		log.Fatalln("parsing failed")
+	ext := filepath.Ext(name)
+	var img []byte
+	if ext == ".false" {
+		p := false.NewParser()
+		img, err = p.Parse(string(data))
+		if err != nil {
+			log.Fatalln("parsing failed")
+		}
+	} else if ext == ".bf" {
+		p := bf.NewParser()
+		img, err = p.Parse(string(data))
+		if err != nil {
+			log.Fatalln("parsing failed")
+		}
+	} else {
+		log.Fatalln("unsupported file type")
 	}
+
 	h := ""
 	img32 := make([]int, len(img)/4)
 	c := 0
@@ -36,10 +51,10 @@ func main() {
 	}
 	log.Printf("   image loaded: %s\n", h)
 
-	vm := vm2.NewVM(1024, 60, 60)
+	vm := vm2.NewVM(10240, 60, 60)
 	err = vm.Load(img32)
 	if err != nil {
-		log.Fatalln("image loading failed")
+		log.Fatalln("image loading failed:", err)
 	}
 	before := time.Now().UnixMilli()
 	err = vm.Run()
