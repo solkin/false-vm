@@ -1,2 +1,2 @@
 # false-vm
-False Language Virtual Machine
+Virtual Machine + False and Brainfuck compilers
