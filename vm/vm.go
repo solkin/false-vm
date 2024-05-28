@@ -84,63 +84,39 @@ func (vm *VM) Run() (int, error) {
 			}
 			break
 		case InstrSwap:
-			if v1, err := vm.OpStack.Pop(); err == nil {
-				if v2, err := vm.OpStack.Pop(); err == nil {
-					err = vm.OpStack.Push(v1)
-					if err != nil {
-						return ic, err
+			v1, v2, err := vm.OpStack.PopPop()
+			if err == nil {
+				if err = vm.OpStack.Push(v1); err == nil {
+					if err = vm.OpStack.Push(v2); err == nil {
+						break
 					}
-					err = vm.OpStack.Push(v2)
-					if err != nil {
-						return ic, err
-					}
-				} else {
-					return ic, err
 				}
-			} else {
-				return ic, err
 			}
-			break
+			return ic, err
 		case InstrRot:
 			if x2, err := vm.OpStack.Pop(); err == nil {
 				if x1, err := vm.OpStack.Pop(); err == nil {
 					if x, err := vm.OpStack.Pop(); err == nil {
-						err = vm.OpStack.Push(x1)
-						if err != nil {
-							return ic, err
+						if err = vm.OpStack.Push(x1); err == nil {
+							if err = vm.OpStack.Push(x2); err == nil {
+								if err = vm.OpStack.Push(x); err == nil {
+									break
+								}
+							}
 						}
-						err = vm.OpStack.Push(x2)
-						if err != nil {
-							return ic, err
-						}
-						err = vm.OpStack.Push(x)
-						if err != nil {
-							return ic, err
-						}
-					} else {
+					}
+				}
+			}
+			return ic, err
+		case InstrPick:
+			if v, err := vm.OpStack.Pop(); err == nil {
+				if v, err = vm.OpStack.Pick(v); err == nil {
+					if err = vm.OpStack.Push(v); err == nil {
 						return ic, err
 					}
-				} else {
-					return ic, err
 				}
-			} else {
-				return ic, err
 			}
-			break
-		case InstrPick:
-			v, err := vm.OpStack.Pop()
-			if err != nil {
-				return ic, err
-			}
-			v, err = vm.OpStack.Pick(v)
-			if err != nil {
-				return ic, err
-			}
-			err = vm.OpStack.Push(v)
-			if err != nil {
-				return ic, err
-			}
-			break
+			return ic, err
 		case InstrPlus:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
