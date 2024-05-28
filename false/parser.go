@@ -2,6 +2,7 @@ package false
 
 import (
 	"errors"
+	"io"
 	"sandbox-vm/input"
 	"sandbox-vm/vm"
 )
@@ -35,7 +36,7 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Parse(str string) ([]byte, error) {
+func (p *Parser) Parse(str string, out io.Writer) error {
 	ti := TokenInput{Input: &input.StringInput{Str: str}}
 
 	w := vm.NewBytecodeWriter()
@@ -46,13 +47,13 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			if v, err := ti.ReadInt(); err == nil {
 				w.WritePush(v)
 			} else {
-				return nil, err
+				return err
 			}
 		} else if ti.IsCharCode() {
 			if v, err := ti.ReadCharCode(); err == nil {
 				w.WritePush(int(v))
 			} else {
-				return nil, err
+				return err
 			}
 		} else if ti.IsVar() {
 			if v, m, err := ti.ReadVar(); err == nil {
@@ -72,7 +73,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 					break
 				}
 			} else {
-				return nil, err
+				return err
 			}
 		} else if ti.IsSubStart() {
 			ti.SkipSubStart()
@@ -81,7 +82,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			ti.SkipSubEnd()
 			if err := w.SubReturn(); err != nil {
 				ti.Input.Croak(err.Error())
-				return nil, err
+				return err
 			}
 		} else if ti.IsSubCall() {
 			ti.SkipSubCall()
@@ -103,7 +104,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			w.WriteCall()
 			bca, err := w.BlockSkip()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			// Call condition
 			w.WriteFetch(ca)
@@ -119,22 +120,23 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 				} else {
 					err := errors.New("invalid command")
 					ti.Input.Croak(err.Error())
-					return nil, err
+					return err
 				}
 			} else {
-				return nil, err
+				return err
 			}
 		} else if ti.IsString() {
 			if s, err := ti.ReadString(); err == nil {
 				w.WriteString(s)
 			} else {
 				ti.Input.Croak(err.Error())
-				return nil, err
+				return err
 			}
 		} else if ti.IsWhitespace() {
 			ti.SkipWhitespace()
 		}
 	}
 	w.WriteEnd()
-	return w.Bytes(), nil
+	_, err := w.WriteTo(out)
+	return err
 }

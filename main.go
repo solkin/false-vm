@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -23,16 +24,16 @@ func main() {
 	}
 
 	ext := filepath.Ext(name)
-	var img []byte
+	img := new(bytes.Buffer)
 	if ext == ".false" {
 		p := false.NewParser()
-		img, err = p.Parse(string(data))
+		err = p.Parse(string(data), img)
 		if err != nil {
 			log.Fatalln("parsing failed")
 		}
 	} else if ext == ".bf" {
 		p := bf.NewParser()
-		img, err = p.Parse(string(data))
+		err = p.Parse(string(data), img)
 		if err != nil {
 			log.Fatalln("parsing failed")
 		}
@@ -40,11 +41,13 @@ func main() {
 		log.Fatalln("unsupported file type")
 	}
 
+	imgBytes := img.Bytes()
+
 	h := ""
-	img32 := make([]int, len(img)/4)
+	img32 := make([]int, len(imgBytes)/4)
 	c := 0
-	for i := 0; i < len(img); i += 4 {
-		i32 := binary.LittleEndian.Uint32(img[i : i+4])
+	for i := 0; i < len(imgBytes); i += 4 {
+		i32 := binary.LittleEndian.Uint32(imgBytes[i : i+4])
 		img32[c] = int(i32)
 		c++
 		h += fmt.Sprintf("%d ", i32)

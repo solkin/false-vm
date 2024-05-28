@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"log"
 )
 
@@ -208,6 +209,12 @@ func (w *BytecodeWriter) WriteBytes(p []byte) {
 
 func (w *BytecodeWriter) Bytes() []byte {
 	return w.buf().Bytes()
+}
+
+func (w *BytecodeWriter) WriteTo(out io.Writer) (int64, error) {
+	img := w.buf().Bytes()
+	n, err := out.Write(img)
+	return int64(n), err
 }
 
 func (w *BytecodeWriter) assertError(err error) {

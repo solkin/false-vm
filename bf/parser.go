@@ -1,6 +1,7 @@
 package bf
 
 import (
+	"io"
 	"sandbox-vm/input"
 	"sandbox-vm/vm"
 )
@@ -12,7 +13,7 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Parse(str string) ([]byte, error) {
+func (p *Parser) Parse(str string, out io.Writer) error {
 	ti := TokenInput{Input: &input.StringInput{Str: str}}
 
 	w := vm.NewBytecodeWriter()
@@ -23,7 +24,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 	}
 	mem, err := w.BlockSkip()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	mp := w.WriteVar(mem)
 
@@ -31,7 +32,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 		cmd, err := ti.Next()
 		if err != nil {
 			ti.Input.Croak(err.Error())
-			return nil, err
+			return err
 		}
 		switch cmd {
 		case NEXT:
@@ -86,14 +87,14 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			w.WriteFetch(0) // Stub address, will be written by command before
 			if err = w.SubReturn(); err != nil {
 				ti.Input.Croak(err.Error())
-				return nil, err
+				return err
 			}
 			w.SubCreate()
 			break
 		case RETURN:
 			if err = w.SubReturn(); err != nil {
 				ti.Input.Croak(err.Error())
-				return nil, err
+				return err
 			}
 			// Reserved condition and body addresses
 			ba := w.WriteVar(0)
@@ -107,7 +108,7 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 			w.WriteCall()
 			bca, err := w.BlockSkip()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			// Call condition
 			w.WriteFetch(ca)
@@ -120,5 +121,6 @@ func (p *Parser) Parse(str string) ([]byte, error) {
 		}
 	}
 	w.WriteEnd()
-	return w.Bytes(), nil
+	_, err = w.WriteTo(out)
+	return err
 }
