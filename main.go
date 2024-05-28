@@ -3,15 +3,15 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"false-vm/bf"
+	false2 "false-vm/false"
+	"false-vm/input"
+	vm2 "false-vm/vm"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"sandbox-vm/bf"
-	false2 "sandbox-vm/false"
-	"sandbox-vm/input"
-	vm2 "sandbox-vm/vm"
 	"strings"
 	"time"
 )
@@ -44,6 +44,10 @@ func main() {
 			log.Fatalln("unable to read bytecode file:", err.Error())
 		}
 	} else {
+		if src == "" {
+			log.Fatalln("source file is required")
+		}
+
 		if lang == "auto" {
 			ext := strings.ToLower(filepath.Ext(src))
 			switch ext {
@@ -100,10 +104,10 @@ func main() {
 		img := make([]int, len(bc)/unitSize)
 		c := 0
 		for i := 0; i < len(bc); i += unitSize {
-			ui32 := binary.LittleEndian.Uint32(bc[i : i+unitSize])
-			img[c] = int(ui32)
+			u := binary.LittleEndian.Uint32(bc[i : i+unitSize])
+			img[c] = int(u)
 			c++
-			v += fmt.Sprintf("%d ", ui32)
+			v += fmt.Sprintf("%d ", u)
 		}
 		logV(verbose, "image loaded: %s\n", v)
 
@@ -117,7 +121,7 @@ func main() {
 		err = vm.Run()
 		after := time.Now().UnixMilli()
 
-		fmt.Printf("cpu time: %d milliseconds", after-before)
+		fmt.Printf("cpu time: %d milliseconds\n", after-before)
 
 		if err != nil {
 			log.Fatalln("vm fault:", err.Error())

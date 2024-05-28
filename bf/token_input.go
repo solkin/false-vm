@@ -2,7 +2,7 @@ package bf
 
 import (
 	"errors"
-	"sandbox-vm/input"
+	"false-vm/input"
 )
 
 type TokenInput struct {

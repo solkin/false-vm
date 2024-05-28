@@ -1,7 +1,7 @@
 package false
 
 import (
-	"sandbox-vm/input"
+	"false-vm/input"
 	"testing"
 )
 

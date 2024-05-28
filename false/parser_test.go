@@ -1,8 +1,8 @@
 package false
 
 import (
+	"false-vm/vm"
 	"reflect"
-	"sandbox-vm/vm"
 	"testing"
 )
 

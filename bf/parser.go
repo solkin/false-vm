@@ -1,9 +1,9 @@
 package bf
 
 import (
+	"false-vm/input"
+	"false-vm/vm"
 	"io"
-	"sandbox-vm/input"
-	"sandbox-vm/vm"
 )
 
 type Parser struct {

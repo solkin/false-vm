@@ -2,7 +2,7 @@ package false
 
 import (
 	"errors"
-	"sandbox-vm/input"
+	"false-vm/input"
 	"strconv"
 	"unicode"
 )

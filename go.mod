@@ -1,4 +1,4 @@
-module sandbox-vm
+module false-vm
 
 go 1.22.3
 
