@@ -54,13 +54,13 @@ func (vm *VM) Run() (int, error) {
 	oldState, _ := term.MakeRaw(int(os.Stdin.Fd()))
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	ops := 0
+	ic := 0
 	for {
 		i, err := vm.next()
 		if err != nil {
-			return ops, err
+			return ic, err
 		}
-		ops++
+		ic++
 		switch i {
 		case InstrPush:
 			v := 0
@@ -69,18 +69,18 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrDup:
 			v := vm.OpStack.Peek()
 			err = vm.OpStack.Push(v)
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrDrop:
 			_, err = vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrSwap:
@@ -88,17 +88,17 @@ func (vm *VM) Run() (int, error) {
 				if v2, err := vm.OpStack.Pop(); err == nil {
 					err = vm.OpStack.Push(v1)
 					if err != nil {
-						return ops, err
+						return ic, err
 					}
 					err = vm.OpStack.Push(v2)
 					if err != nil {
-						return ops, err
+						return ic, err
 					}
 				} else {
-					return ops, err
+					return ic, err
 				}
 			} else {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrRot:
@@ -107,38 +107,38 @@ func (vm *VM) Run() (int, error) {
 					if x, err := vm.OpStack.Pop(); err == nil {
 						err = vm.OpStack.Push(x1)
 						if err != nil {
-							return ops, err
+							return ic, err
 						}
 						err = vm.OpStack.Push(x2)
 						if err != nil {
-							return ops, err
+							return ic, err
 						}
 						err = vm.OpStack.Push(x)
 						if err != nil {
-							return ops, err
+							return ic, err
 						}
 					} else {
-						return ops, err
+						return ic, err
 					}
 				} else {
-					return ops, err
+					return ic, err
 				}
 			} else {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrPick:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			v, err = vm.OpStack.Pick(v)
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			err = vm.OpStack.Push(v)
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrPlus:
@@ -148,7 +148,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrMinus:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -156,7 +156,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrMultiply:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -164,7 +164,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrDivide:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -172,7 +172,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrNegative:
 			v, err := vm.OpStack.Pop()
 			if err == nil {
@@ -180,7 +180,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrAnd:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -192,7 +192,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrOr:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -204,7 +204,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrNot:
 			v1, err := vm.OpStack.Pop()
 			if err == nil {
@@ -216,7 +216,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrEquals:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -228,7 +228,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrMore:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -240,30 +240,30 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrWriteInt:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			_, _ = w.WriteString(strconv.Itoa(v))
 			break
 		case InstrWriteChar:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			writeChar(v, w)
 			break
 		case InstrWriteStr:
 			l, err := vm.next()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			for i := 0; i < l; i++ {
 				v, err := vm.next()
 				if err != nil {
-					return ops, err
+					return ic, err
 				}
 				writeChar(v, w)
 			}
@@ -272,7 +272,7 @@ func (vm *VM) Run() (int, error) {
 			r, _, _ := r.ReadRune()
 			err = vm.OpStack.Push(int(r))
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			break
 		case InstrFlush:
@@ -290,7 +290,7 @@ func (vm *VM) Run() (int, error) {
 					err = errors.New("out of memory")
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrFetch:
 			var addr int
 			if addr, err = vm.next(); err == nil {
@@ -303,7 +303,7 @@ func (vm *VM) Run() (int, error) {
 					err = errors.New("out of memory")
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrCopy:
 			var addr1, addr2 int
 			if addr1, err = vm.next(); err == nil {
@@ -317,31 +317,31 @@ func (vm *VM) Run() (int, error) {
 					}
 				}
 			}
-			return ops, err
+			return ic, err
 		case InstrCall:
 			addr, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			err = vm.CallStack.Push(vm.ip)
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			vm.ip = addr
 			break
 		case InstrCallIf:
 			addr, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			cond, err := vm.OpStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			if cond != 0 {
 				err = vm.CallStack.Push(vm.ip)
 				if err != nil {
-					return ops, err
+					return ic, err
 				}
 				vm.ip = addr
 			}
@@ -349,25 +349,25 @@ func (vm *VM) Run() (int, error) {
 		case InstrReturn:
 			addr, err := vm.CallStack.Pop()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			vm.ip = addr
 			break
 		case InstrGoto:
 			addr, err := vm.next()
 			if err != nil {
-				return ops, err
+				return ic, err
 			}
 			vm.ip = addr
 			break
 		case InstrGotoIf:
 			addr := 0
 			if addr, err = vm.OpStack.Pop(); err != nil {
-				return ops, err
+				return ic, err
 			}
 			cond := 0
 			if cond, err = vm.OpStack.Pop(); err != nil {
-				return ops, err
+				return ic, err
 			}
 			if cond != 0 {
 				vm.ip = addr
@@ -375,9 +375,9 @@ func (vm *VM) Run() (int, error) {
 			break
 		case InstrEnd:
 			_, _ = w.WriteString("\n\nvm gracefully stopped\n")
-			return ops, nil
+			return ic, nil
 		default:
-			return ops, errors.New("invalid instruction " + strconv.Itoa(i))
+			return ic, errors.New("invalid instruction " + strconv.Itoa(i))
 		}
 	}
 }
