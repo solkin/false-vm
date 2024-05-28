@@ -1,5 +1,7 @@
-# false-vm
+# False-VM
 Virtual Machine + False and Brainfuck compilers
+
+![media/term.png](media/term.png)
 
 Build instructions
 ------------------
