@@ -211,6 +211,41 @@ func (ti *TokenInput) SkipWhile() {
 	}
 }
 
+func (ti *TokenInput) IsCommentStart() bool {
+	return ti.Input.Peek() == '{'
+}
+
+func (ti *TokenInput) IsCommentEnd() bool {
+	return ti.Input.Peek() == '{'
+}
+
+func (ti *TokenInput) ReadComment() (string, error) {
+	b := make([]rune, 0)
+	if ti.IsCommentStart() {
+		ti.Input.Next()
+		escaped := false
+		for !ti.Input.Eof() {
+			c := ti.Input.Next()
+			if escaped {
+				escaped = false
+			} else if c == '\\' {
+				escaped = true
+				continue
+			}
+			b = append(b, c)
+			if ti.IsCommentEnd() {
+				ti.Input.Next()
+				break
+			}
+		}
+	} else {
+		err := errors.New("not a comment")
+		ti.Input.Croak(err.Error())
+		return "", err
+	}
+	return string(b), nil
+}
+
 func (ti *TokenInput) IsWhitespace() bool {
 	c := ti.Input.Peek()
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r'

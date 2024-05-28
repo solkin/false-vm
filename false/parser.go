@@ -136,6 +136,11 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 				ti.Input.Croak(err.Error())
 				return err
 			}
+		} else if ti.IsCommentStart() {
+			if _, err := ti.ReadComment(); err != nil {
+				ti.Input.Croak(err.Error())
+				return err
+			}
 		} else if ti.IsWhitespace() {
 			ti.SkipWhitespace()
 		}
