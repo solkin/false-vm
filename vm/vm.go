@@ -61,15 +61,13 @@ func (vm *VM) Run() error {
 		}
 		switch i {
 		case InstrPush:
-			v, err := vm.next()
-			if err != nil {
-				return err
+			v := 0
+			if v, err = vm.next(); err == nil {
+				if err = vm.OpStack.Push(v); err == nil {
+					break
+				}
 			}
-			if err := vm.OpStack.Push(v); err != nil {
-				vm.Fault()
-				vm.Dump()
-			}
-			break
+			return err
 		case InstrDup:
 			v := vm.OpStack.Peek()
 			err = vm.OpStack.Push(v)
@@ -408,16 +406,17 @@ func (vm *VM) Fault() {
 }
 
 func (vm *VM) Dump() {
+	log.Println("instruction pointer: ", vm.ip)
 	h := ""
 	for i := 0; i < vm.ip; i++ {
 		h += fmt.Sprintf("%d ", vm.Memory[i])
 	}
-	log.Println("     image dump: ", h)
+	log.Println("image dump: ", h)
 	h = ""
 	for i := vm.OpStack.Offset + vm.OpStack.Size - 1; i >= vm.OpStack.p; i-- {
 		h += fmt.Sprintf("%d ", vm.OpStack.Array[i])
 	}
-	log.Println("  op stack dump: ", h)
+	log.Println("op stack dump: ", h)
 	h = ""
 	for i := vm.CallStack.Offset + vm.CallStack.Size - 1; i >= vm.CallStack.p; i-- {
 		h += fmt.Sprintf("%d ", vm.CallStack.Array[i])

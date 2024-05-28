@@ -3,68 +3,133 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"sandbox-vm/bf"
-	"sandbox-vm/false"
+	false2 "sandbox-vm/false"
+	"sandbox-vm/input"
 	vm2 "sandbox-vm/vm"
+	"strings"
 	"time"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatalln("file name argument required")
-	}
-	name := os.Args[1]
-	data, err := os.ReadFile(name)
-	if err != nil {
-		log.Fatalln("unable to read file:", err.Error())
-	}
+	var bcf string
+	var src string
+	var lang string
+	var out string
+	var run bool
+	var verbose bool
+	var memSize int
+	var opStackSize int
+	var callStackSize int
+	flag.StringVar(&bcf, "b", "", "bytecode file (has more priority than source file parameter)")
+	flag.StringVar(&src, "s", "", "source file (.bf and .false are supported)")
+	flag.StringVar(&lang, "l", "auto", "force set language: auto (autodetect by file extension), false - FALSE, bf - Brainfuck")
+	flag.StringVar(&out, "o", "", "output compiled bytecode to file")
+	flag.BoolVar(&run, "r", true, "run compiled file")
+	flag.BoolVar(&verbose, "v", false, "verbose log mode")
+	flag.IntVar(&memSize, "m", 131072, "total memory size (32-bit integers)")
+	flag.IntVar(&opStackSize, "os", 1280, "operation stack size (part of total memory; 32-bit integers)")
+	flag.IntVar(&callStackSize, "cs", 640, "call stack size (part of total memory; 32-bit integers)")
+	flag.Parse()
 
-	ext := filepath.Ext(name)
-	img := new(bytes.Buffer)
-	if ext == ".false" {
-		p := false.NewParser()
-		err = p.Parse(string(data), img)
-		if err != nil {
-			log.Fatalln("parsing failed")
-		}
-	} else if ext == ".bf" {
-		p := bf.NewParser()
-		err = p.Parse(string(data), img)
-		if err != nil {
-			log.Fatalln("parsing failed")
+	var err error
+	var bc []byte
+	if bcf != "" {
+		if bc, err = os.ReadFile(bcf); err != nil {
+			log.Fatalln("unable to read bytecode file:", err.Error())
 		}
 	} else {
-		log.Fatalln("unsupported file type")
+		if lang == "auto" {
+			ext := strings.ToLower(filepath.Ext(src))
+			switch ext {
+			case ".bf":
+				lang = "bf"
+				break
+			case ".f":
+			case ".false":
+				lang = "false"
+				break
+			default:
+				log.Fatalln("unsupported file extension:", ext)
+			}
+		}
+
+		var p input.Parser
+		switch lang {
+		case "bf":
+			p = bf.NewParser()
+			break
+		case "false":
+			p = false2.NewParser()
+			break
+		default:
+			log.Fatalln("unsupported language:", lang)
+		}
+
+		r, err := os.Open(src)
+		if err != nil {
+			log.Fatalln("unable to open file:", err.Error())
+		}
+		w := new(bytes.Buffer)
+		err = p.Parse(r, w)
+		if err != nil {
+			log.Fatalln("parsing failed")
+		}
+
+		bc = w.Bytes()
 	}
 
-	imgBytes := img.Bytes()
-
-	h := ""
-	img32 := make([]int, len(imgBytes)/4)
-	c := 0
-	for i := 0; i < len(imgBytes); i += 4 {
-		i32 := binary.LittleEndian.Uint32(imgBytes[i : i+4])
-		img32[c] = int(i32)
-		c++
-		h += fmt.Sprintf("%d ", i32)
+	if out != "" {
+		if err := os.WriteFile(out, bc, 0644); err != nil {
+			log.Fatalln("bytecode writing failed with error,", err.Error())
+		}
+		fmt.Printf("%d bytes written to file %s\n", len(bc), filepath.Base(out))
 	}
-	log.Printf("   image loaded: %s\n", h)
 
-	vm := vm2.NewVM(10240, 60, 60)
-	err = vm.Load(img32)
-	if err != nil {
-		log.Fatalln("image loading failed:", err)
+	if run {
+		unitSize := 4
+		if len(bc)%unitSize != 0 {
+			log.Fatalln("invalid byte alignment")
+		}
+		v := ""
+		img := make([]int, len(bc)/unitSize)
+		c := 0
+		for i := 0; i < len(bc); i += unitSize {
+			ui32 := binary.LittleEndian.Uint32(bc[i : i+unitSize])
+			img[c] = int(ui32)
+			c++
+			v += fmt.Sprintf("%d ", ui32)
+		}
+		logV(verbose, "image loaded: %s\n", v)
+
+		vm := vm2.NewVM(memSize, opStackSize, callStackSize)
+		err = vm.Load(img)
+		if err != nil {
+			log.Fatalln("image loading failed:", err)
+		}
+
+		before := time.Now().UnixMilli()
+		err = vm.Run()
+		after := time.Now().UnixMilli()
+
+		fmt.Printf("cpu time: %d milliseconds", after-before)
+
+		if err != nil {
+			log.Fatalln("vm fault:", err.Error())
+		}
+		if verbose {
+			vm.Dump()
+		}
 	}
-	before := time.Now().UnixMilli()
-	err = vm.Run()
-	after := time.Now().UnixMilli()
-	log.Println("cpu time: ", after-before, "milliseconds")
-	vm.Dump()
-	if err != nil {
-		log.Fatalln("vm fault:", err.Error())
+}
+
+func logV(verbose bool, format string, a ...any) {
+	if verbose {
+		fmt.Printf(format, a...)
 	}
 }
