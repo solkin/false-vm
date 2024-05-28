@@ -71,9 +71,43 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 			bc.WriteStore(0)
 			break
 		case IN:
+			// Read char
 			bc.WriteCommand(vm.InstrReadChar)
+
+			// Minus 13 to determine CR
+			bc.WritePush(13)
+			bc.WriteCommand(vm.InstrMinus)
+			bc.WriteCommand(vm.InstrDup)
+
+			// Sub correct value if it is not CR
+			bc.SubCreate()
+			bc.WritePush(13)
+			bc.WriteCommand(vm.InstrPlus)
+			if err = bc.SubReturn(); err != nil {
+				ti.Input.Croak(err.Error())
+				return err
+			}
+			bc.WriteCallIf()
+
+			// Log purpose only
+			bc.WriteCommand(vm.InstrDup)
 			bc.WriteCommand(vm.InstrDup)
 			bc.WriteCommand(vm.InstrWriteChar)
+
+			// Add line break on CR
+			bc.WriteCommand(vm.InstrNot)
+			bc.SubCreate()
+			bc.WritePush('\n')
+			bc.WriteCommand(vm.InstrWriteChar)
+			if err = bc.SubReturn(); err != nil {
+				ti.Input.Croak(err.Error())
+				return err
+			}
+			bc.WriteCallIf()
+
+			bc.WriteCommand(vm.InstrFlush)
+
+			// Store value to current cell
 			bc.WriteFetch(mp)
 			bc.WriteStore(bc.Len() + 3)
 			bc.WriteStore(0) // Stub address, will be written by command before
@@ -83,6 +117,7 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 			bc.WriteStore(bc.Len() + 3)
 			bc.WriteFetch(0) // Stub address, will be written by command before
 			bc.WriteCommand(vm.InstrWriteChar)
+			bc.WriteCommand(vm.InstrFlush)
 			break
 		case SUB:
 			// Create conditional sub
