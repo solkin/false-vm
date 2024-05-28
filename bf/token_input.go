@@ -37,7 +37,7 @@ func (ti *TokenInput) ReadCharCode() (rune, error) {
 	return 0, err
 }
 
-func (ti *TokenInput) isCommand() bool {
+func (ti *TokenInput) IsCommand() bool {
 	c := ti.Input.Peek()
 	switch c {
 	case NEXT, PREV,
@@ -50,16 +50,12 @@ func (ti *TokenInput) isCommand() bool {
 	}
 }
 
-func (ti *TokenInput) Next() (rune, error) {
-	for !ti.Eof() && !ti.isCommand() {
-		ti.Input.Next()
-	}
-	if ti.Eof() {
-		err := errors.New("not an arithmetic operation")
-		ti.Input.Croak(err.Error())
-		return 0, err
-	}
-	return ti.Input.Next(), nil
+func (ti *TokenInput) Skip() {
+	ti.Input.Next()
+}
+
+func (ti *TokenInput) Next() rune {
+	return ti.Input.Next()
 }
 
 func (ti *TokenInput) Eof() bool {

@@ -23,7 +23,7 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 	bc := vm.NewBytecodeWriter()
 
 	bc.BlockCreate()
-	for i := 0; i < 1024; i++ {
+	for i := 0; i < 30720; i++ {
 		bc.WriteInt(0)
 	}
 	mem, err := bc.BlockSkip()
@@ -33,11 +33,10 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 	mp := bc.WriteVar(mem)
 
 	for !ti.Eof() {
-		cmd, err := ti.Next()
-		if err != nil {
-			ti.Input.Croak(err.Error())
-			return err
+		if !ti.IsCommand() {
+			ti.Skip()
 		}
+		cmd := ti.Next()
 		switch cmd {
 		case NEXT:
 			bc.WriteFetch(mp)
@@ -73,6 +72,8 @@ func (p *Parser) Parse(r io.Reader, w io.Writer) error {
 			break
 		case IN:
 			bc.WriteCommand(vm.InstrReadChar)
+			bc.WriteCommand(vm.InstrDup)
+			bc.WriteCommand(vm.InstrWriteChar)
 			bc.WriteFetch(mp)
 			bc.WriteStore(bc.Len() + 3)
 			bc.WriteStore(0) // Stub address, will be written by command before
