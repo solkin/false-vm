@@ -41,7 +41,7 @@ func (vm *VM) Load(img []int) error {
 	return nil
 }
 
-func (vm *VM) Run() (int, error) {
+func (vm *VM) Run() error {
 	r := bufio.NewReader(os.Stdin)
 	w := bufio.NewWriter(os.Stdout)
 
@@ -54,13 +54,11 @@ func (vm *VM) Run() (int, error) {
 	oldState, _ := term.MakeRaw(int(os.Stdin.Fd()))
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	ic := 0
 	for {
 		i, err := vm.next()
 		if err != nil {
-			return ic, err
+			return err
 		}
-		ic++
 		switch i {
 		case InstrPush:
 			v := 0
@@ -69,18 +67,18 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrDup:
 			v := vm.OpStack.Peek()
 			err = vm.OpStack.Push(v)
 			if err != nil {
-				return ic, err
+				return err
 			}
 			break
 		case InstrDrop:
 			_, err = vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			break
 		case InstrSwap:
@@ -92,7 +90,7 @@ func (vm *VM) Run() (int, error) {
 					}
 				}
 			}
-			return ic, err
+			return err
 		case InstrRot:
 			if x2, err := vm.OpStack.Pop(); err == nil {
 				if x1, err := vm.OpStack.Pop(); err == nil {
@@ -107,16 +105,16 @@ func (vm *VM) Run() (int, error) {
 					}
 				}
 			}
-			return ic, err
+			return err
 		case InstrPick:
 			if v, err := vm.OpStack.Pop(); err == nil {
 				if v, err = vm.OpStack.Pick(v); err == nil {
 					if err = vm.OpStack.Push(v); err == nil {
-						return ic, err
+						return err
 					}
 				}
 			}
-			return ic, err
+			return err
 		case InstrPlus:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -124,7 +122,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrMinus:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -132,7 +130,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrMultiply:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -140,7 +138,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrDivide:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -148,7 +146,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrNegative:
 			v, err := vm.OpStack.Pop()
 			if err == nil {
@@ -156,7 +154,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrAnd:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -168,7 +166,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrOr:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -180,7 +178,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrNot:
 			v1, err := vm.OpStack.Pop()
 			if err == nil {
@@ -192,7 +190,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrEquals:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -204,7 +202,7 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrMore:
 			v1, v2, err := vm.OpStack.PopPop()
 			if err == nil {
@@ -216,30 +214,30 @@ func (vm *VM) Run() (int, error) {
 					break
 				}
 			}
-			return ic, err
+			return err
 		case InstrWriteInt:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			_, _ = w.WriteString(strconv.Itoa(v))
 			break
 		case InstrWriteChar:
 			v, err := vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			writeChar(v, w)
 			break
 		case InstrWriteStr:
 			l, err := vm.next()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			for i := 0; i < l; i++ {
 				v, err := vm.next()
 				if err != nil {
-					return ic, err
+					return err
 				}
 				writeChar(v, w)
 			}
@@ -248,7 +246,7 @@ func (vm *VM) Run() (int, error) {
 			r, _, _ := r.ReadRune()
 			err = vm.OpStack.Push(int(r))
 			if err != nil {
-				return ic, err
+				return err
 			}
 			break
 		case InstrFlush:
@@ -266,7 +264,7 @@ func (vm *VM) Run() (int, error) {
 					err = errors.New("out of memory")
 				}
 			}
-			return ic, err
+			return err
 		case InstrFetch:
 			var addr int
 			if addr, err = vm.next(); err == nil {
@@ -279,7 +277,7 @@ func (vm *VM) Run() (int, error) {
 					err = errors.New("out of memory")
 				}
 			}
-			return ic, err
+			return err
 		case InstrCopy:
 			var addr1, addr2 int
 			if addr1, err = vm.next(); err == nil {
@@ -293,31 +291,31 @@ func (vm *VM) Run() (int, error) {
 					}
 				}
 			}
-			return ic, err
+			return err
 		case InstrCall:
 			addr, err := vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			err = vm.CallStack.Push(vm.ip)
 			if err != nil {
-				return ic, err
+				return err
 			}
 			vm.ip = addr
 			break
 		case InstrCallIf:
 			addr, err := vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			cond, err := vm.OpStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			if cond != 0 {
 				err = vm.CallStack.Push(vm.ip)
 				if err != nil {
-					return ic, err
+					return err
 				}
 				vm.ip = addr
 			}
@@ -325,25 +323,25 @@ func (vm *VM) Run() (int, error) {
 		case InstrReturn:
 			addr, err := vm.CallStack.Pop()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			vm.ip = addr
 			break
 		case InstrGoto:
 			addr, err := vm.next()
 			if err != nil {
-				return ic, err
+				return err
 			}
 			vm.ip = addr
 			break
 		case InstrGotoIf:
 			addr := 0
 			if addr, err = vm.OpStack.Pop(); err != nil {
-				return ic, err
+				return err
 			}
 			cond := 0
 			if cond, err = vm.OpStack.Pop(); err != nil {
-				return ic, err
+				return err
 			}
 			if cond != 0 {
 				vm.ip = addr
@@ -351,9 +349,9 @@ func (vm *VM) Run() (int, error) {
 			break
 		case InstrEnd:
 			_, _ = w.WriteString("\n\nvm gracefully stopped\n")
-			return ic, nil
+			return nil
 		default:
-			return ic, errors.New("invalid instruction " + strconv.Itoa(i))
+			return errors.New("invalid instruction " + strconv.Itoa(i))
 		}
 	}
 }

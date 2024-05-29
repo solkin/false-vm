@@ -122,10 +122,10 @@ func main() {
 		}
 
 		before := time.Now().UnixMilli()
-		ic, err := vm.Run()
+		err := vm.Run()
 		after := time.Now().UnixMilli()
 
-		fmt.Printf("cpu instructions %d, time %d milliseconds\n", ic, after-before)
+		fmt.Printf("cpu time %d milliseconds\n", after-before)
 
 		if err != nil {
 			log.Fatalln("vm fault:", err.Error())
