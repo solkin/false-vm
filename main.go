@@ -84,6 +84,10 @@ func main() {
 		if err != nil {
 			log.Fatalln("parsing failed")
 		}
+		err = r.Close()
+		if err != nil {
+			log.Fatalln("closing failed")
+		}
 
 		bc = w.Bytes()
 	}
