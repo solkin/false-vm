@@ -54,7 +54,7 @@ To compile and run Fibonacci sample:
 This will compile Fibonacci sample to bytecode file without running:
 
 ```
-./false-vm -s false/samples/fibonacci.false -o fib.fbc -r false
+./false-vm -s false/samples/fibonacci.false -o fib.fbc -r=0
 ```
 
 and when you need to run, just type:
