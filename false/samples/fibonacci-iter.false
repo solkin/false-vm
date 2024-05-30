@@ -1,0 +1,2 @@
+0a: 1b: 0t: 1i: [ n: [n;i;>][i;1+i: a;b;+t: b;a: t;b:]# b; ]f:
+100 $. "th Fibonacci number is " f;! . {compute & print 33th fibonacci number}
