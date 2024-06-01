@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"false-vm/arithmetic"
 	"false-vm/bf"
 	false2 "false-vm/false"
 	"false-vm/input"
@@ -58,6 +59,9 @@ func main() {
 			case ".false":
 				lang = "false"
 				break
+			case ".txt":
+				lang = "arithmetic"
+				break
 			default:
 				log.Fatalln("unsupported file extension:", ext)
 			}
@@ -70,6 +74,9 @@ func main() {
 			break
 		case "false":
 			p = false2.NewParser()
+			break
+		case "arithmetic":
+			p = arithmetic.NewParser()
 			break
 		default:
 			log.Fatalln("unsupported language:", lang)
